@@ -16,9 +16,6 @@ This folder is a compact runnable package for the Baseline, SUR, and SharedQ exp
 - `run_experiment.py`: experiment entry point.
 - `experiment_datasets.py`: dataset folder list used by the experiment runner.
 - `preprocess_skyline.py`: skyline preprocessing used by Baseline and SUR.
-- `summarize_experiment_results.py`: collect experiment summaries.
-- `plot_experiment_summaries.py`: draw summary figures.
-- `plot_rho_experiment.py`: draw rho sweep figures.
 - `original_datasets/4d_100k_10/`: included original dataset batch.
 - `after_skyline_datasets/`: generated automatically by preprocessing.
 - `results/`: experiment outputs.
