@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+*$py.class
+
+.venv/
+venv/
+env/
+.env
+
+.pytest_cache/
+.mypy_cache/
+
+after_skyline_datasets/
+results/
+
+*.log
+*.tmp
