@@ -12,8 +12,7 @@ This folder is a compact runnable package for the Baseline, SUR, and SharedQ exp
 - `SUR/`: Shared Utility Range implementation.
 - `SharedQ/`: SharedQ implementation.
 - `structure/`: common data structures, utility range, skyline helpers.
-- `experiment_config.py`: unified experiment configuration and runner for Baseline, SUR, and SharedQ.
-- `run_experiment.py`: experiment entry point.
+- `run_experiment.py`: experiment configuration and entry point for Baseline, SUR, and SharedQ.
 - `experiment_datasets.py`: dataset folder list used by the experiment runner.
 - `preprocess_skyline.py`: skyline preprocessing used by Baseline and SUR.
 - `original_datasets/4d_100k_10/`: included original dataset batch.
@@ -63,7 +62,7 @@ rhos = (0.1,)
 alpha_beta_ratios = (1,)
 ```
 
-You can edit these values directly near the top of `experiment_config.py`.
+You can edit these values directly in `ExperimentConfig` near the top of `run_experiment.py`.
 
 ## Output Files
 
