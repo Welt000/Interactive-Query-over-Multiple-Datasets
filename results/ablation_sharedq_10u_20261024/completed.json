@@ -1,9 +1,0 @@
-{
-  "groups": [
-    "detect_divide_only",
-    "pca_only",
-    "neither",
-    "full"
-  ],
-  "completed": "2026-10-25T05:01:07+0800"
-}

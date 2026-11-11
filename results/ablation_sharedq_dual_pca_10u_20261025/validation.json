@@ -1,7 +1,0 @@
-{
-  "validated_runs": 50,
-  "independently_verified_answers": 500,
-  "dataset_hashes_verified": true,
-  "new_utilities_distinct_from_both_previous_batches": true,
-  "summary_recomputed": true
-}

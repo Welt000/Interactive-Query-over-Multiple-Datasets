@@ -1,5 +1,0 @@
-group,pca_reduction,detect_divide,finished_utilities,successful_utilities,timeout_utilities,error_utilities,datasets_per_utility,reused,status,avg_questions_successful,avg_seconds_successful,accuracy_successful
-detect_divide_only,False,True,10,10,0,0,10,False,ok,25.3,7.670965106226504,1.0
-full,True,True,10,10,0,0,10,False,ok,26.4,8.11828775005415,1.0
-neither,False,False,10,10,0,0,10,False,ok,20.4,1171.4772139493375,1.0
-pca_original,True,False,10,10,0,0,10,False,ok,20.6,946.6441862616688,1.0
