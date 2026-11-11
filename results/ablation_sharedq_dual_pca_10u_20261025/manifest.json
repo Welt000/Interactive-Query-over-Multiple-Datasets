@@ -1,0 +1,189 @@
+{
+  "datasets": [
+    {
+      "name": "4d_100k_mix10_4_corr_1.txt",
+      "sha256": "99e7839c493760deea779399c391d9d4fb14c0fc36f39a611b727b2ac2390eaf",
+      "shape": [
+        100000,
+        4
+      ],
+      "sha256_lf": "4fe0f0dcda15c1ed7ddf0bfb744474275be79decdefbe1ad46b5a268459aed13"
+    },
+    {
+      "name": "4d_100k_mix10_5_corr_2.txt",
+      "sha256": "ea3422a678245fd9633e5fe1c3a1f0836a7b257e75effb997d66ec4447fa50f9",
+      "shape": [
+        100000,
+        4
+      ],
+      "sha256_lf": "149fdfdbc70fde36b6a167f16ccd367bd39708024a5d7a56f1081d1b6d33b9a9"
+    },
+    {
+      "name": "4d_100k_mix10_6_corr_3.txt",
+      "sha256": "8c9c204d0579fa2c297fd9547fe23e787eff272ebec9cb14baa4d42df30f79d6",
+      "shape": [
+        100000,
+        4
+      ],
+      "sha256_lf": "f15f6b699ef4fbb7b1f3e7b3fe2f5281c776b14083b530e44dab56387c805126"
+    },
+    {
+      "name": "4d_100k_mix10_7_ind_1.txt",
+      "sha256": "5a8d70535517b9de41c3090baa0542f5268343db55f1fcc1023a2cfb2964cf91",
+      "shape": [
+        100000,
+        4
+      ],
+      "sha256_lf": "77fa77d20830e333a20b34568f0e09b4c53f21315efc6c78dcc5d71dd7fd0600"
+    },
+    {
+      "name": "4d_100k_mix10_8_ind_2.txt",
+      "sha256": "f7cd27ccd18883412a128b0075b948a6be223716e3253ea8ecb6289b5d823293",
+      "shape": [
+        100000,
+        4
+      ],
+      "sha256_lf": "37088c5355ac76d159a041576d954eeeaca09581bdad7afe01cfd69add0d0cba"
+    },
+    {
+      "name": "4d_100k_mix10_9_ind_3.txt",
+      "sha256": "f0e8a8b57d3b0f4fd4f163f99883544ec5dfc811a0d6c3fe3a626093bc434315",
+      "shape": [
+        100000,
+        4
+      ],
+      "sha256_lf": "02f9d1407843c68a98f6bd96265baf9816a70cc2d39d79e689a7833d59094bbf"
+    },
+    {
+      "name": "4d_100k_mix10_10_ind_4.txt",
+      "sha256": "b22cad7fe50d33bdb714e4480b1e9dceb57443c3fe606723beac0016255c242b",
+      "shape": [
+        100000,
+        4
+      ],
+      "sha256_lf": "cb331518ee9aa2bec999c2c16432f7d13e3236241d5f65b2a791d7fda700b5e2"
+    },
+    {
+      "name": "4d_100k_mix10_1_anti_1.txt",
+      "sha256": "9a93463898d58080168199b92b682b3ea4182b4a4c82c0c20e863baf9b7ae71f",
+      "shape": [
+        100000,
+        4
+      ],
+      "sha256_lf": "c29d534e50349e0c87ab8c7fd208e04d9ea65c57b84414222646f35073e6ae89"
+    },
+    {
+      "name": "4d_100k_mix10_2_anti_2.txt",
+      "sha256": "d518ee95ecd22f4294f9fb999ae1a5ceaac069c917f1202db783224fea2fedb6",
+      "shape": [
+        100000,
+        4
+      ],
+      "sha256_lf": "9c5c77a9aec57cc45b0778a205d2c203a9534bce19a48b19b79b0e52baadec08"
+    },
+    {
+      "name": "4d_100k_mix10_3_anti_3.txt",
+      "sha256": "86432934f50a4c1460b79c319b971cec7acd04c8d59c889cdf9124200919bb1b",
+      "shape": [
+        100000,
+        4
+      ],
+      "sha256_lf": "380b12f9f70eeb5d329b477da8d03f7edd0055f3f935c628da6a5581513d7dde"
+    }
+  ],
+  "distribution": {
+    "corr": 3,
+    "anti": 3,
+    "ind": 4
+  },
+  "utilities": [
+    [
+      0.2785095464897792,
+      0.09731164628400771,
+      0.12485203414438659,
+      0.4993267730818263
+    ],
+    [
+      0.013544116991914223,
+      0.2873609447310127,
+      0.17326539337453883,
+      0.5258295449025343
+    ],
+    [
+      0.18865998792951705,
+      0.3805278943737653,
+      0.4237725706010313,
+      0.007039547095686503
+    ],
+    [
+      0.35309747155690296,
+      0.03681707780916924,
+      0.11891329916206568,
+      0.49117215147186194
+    ],
+    [
+      0.17396594027127385,
+      0.27354212787417914,
+      0.3807344249799374,
+      0.17175750687460947
+    ],
+    [
+      0.16370023620274926,
+      0.6265444364988538,
+      0.11088257702577509,
+      0.0988727502726219
+    ],
+    [
+      0.09995256913350925,
+      0.4793232296917735,
+      0.28108960097411984,
+      0.13963460020059737
+    ],
+    [
+      0.43205230818671064,
+      0.4203839564532848,
+      0.1241536411211217,
+      0.023410094238882826
+    ],
+    [
+      0.026394732834067073,
+      0.03897140530998707,
+      0.9069360566057348,
+      0.027697805250211014
+    ],
+    [
+      0.01644935616684205,
+      0.21449906443736813,
+      0.4347762750742312,
+      0.33427530432155866
+    ]
+  ],
+  "seed": 20261025,
+  "utility_generation": "Dirichlet(1,1,1,1), NumPy default_rng",
+  "utility_generation_seed": 20261025,
+  "timeout_seconds": 3600,
+  "timeout_unit": "one utility over all ten datasets",
+  "hyperplane_reduction_off": "exhaustive cross-dataset scoring, no pair cap",
+  "partition_construction_by_group": {
+    "neither": "exhaustive per-candidate scans, no neighbor walk",
+    "pca_original": "same exhaustive per-candidate scans as neither, PCA reduction enabled",
+    "pca_hdpi": "HDPI all-candidate initialization and incremental clipping, PCA reduction enabled",
+    "detect_divide_only": "detect-and-divide neighbor partitions; exhaustive question scoring",
+    "full": "detect-and-divide neighbor partitions and PCA reduction"
+  },
+  "parameters": {
+    "rhos": [
+      0.1
+    ],
+    "alpha": 1.0,
+    "beta": 1.0,
+    "radius_growth": 2.0,
+    "detect_round_limit": 100,
+    "divide_round_limit": null,
+    "max_questions": 10000,
+    "max_pairs_per_dataset": 20000,
+    "tolerance": 1e-09
+  },
+  "source_manifest": "results/ablation_sharedq/manifest.json",
+  "notes": "Fresh batch, five groups, full rerun; no historical results reused."
+}

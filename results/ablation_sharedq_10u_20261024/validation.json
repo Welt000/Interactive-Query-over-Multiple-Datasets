@@ -1,0 +1,11 @@
+{
+  "validated_runs": 40,
+  "validated_dataset_answers": 400,
+  "new_utilities_distinct_from_previous": true,
+  "summary_recomputed": true,
+  "all_successful": true,
+  "local_source_sha256": {
+    "SharedQ\\algorithm.py": "a350ffe06d04d46d321521cc7c8d52692c15c803b551e3f1b9444f68aa06c064",
+    "ablation\\run_ablation_fresh.py": "3953352defad03f6a330156b6f21cb27c5062f7027133d207a6c1c872634b682"
+  }
+}

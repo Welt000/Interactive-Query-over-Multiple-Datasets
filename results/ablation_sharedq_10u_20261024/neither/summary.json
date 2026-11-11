@@ -1,0 +1,15 @@
+{
+  "group": "neither",
+  "pca_reduction": false,
+  "detect_divide": false,
+  "finished_utilities": 10,
+  "successful_utilities": 10,
+  "timeout_utilities": 0,
+  "error_utilities": 0,
+  "datasets_per_utility": 10,
+  "reused": false,
+  "status": "ok",
+  "avg_questions_successful": 19.5,
+  "avg_seconds_successful": 1113.3721043486148,
+  "accuracy_successful": 1.0
+}

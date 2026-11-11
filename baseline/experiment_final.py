@@ -463,15 +463,15 @@ def run_sharedq(
             radius_growth=args.radius_growth,
             detect_round_limit=args.detect_round_limit,
             divide_round_limit=args.divide_round_limit,
-            random_initial_center=getattr(args, "sharedq_random_initial_u", getattr(args, "dd_random_initial_u", False)),
-            boundary_center_strategy=getattr(args, "sharedq_boundary_center", getattr(args, "dd_boundary_center", "ray_midpoint")),
-            detect_workers=getattr(args, "sharedq_detect_workers", getattr(args, "dd_detect_workers", 4)),
-            verbose=getattr(args, "verbose_sharedq", getattr(args, "verbose_dd", False)),
-            verbose_detect_points=getattr(args, "sharedq_verbose_detect_points", getattr(args, "dd_verbose_detect_points", False)),
+            random_initial_center=args.sharedq_random_initial_u,
+            boundary_center_strategy=args.sharedq_boundary_center,
+            detect_workers=getattr(args, "sharedq_detect_workers", 4),
+            verbose=getattr(args, "verbose_sharedq", False),
+            verbose_detect_points=getattr(args, "sharedq_verbose_detect_points", False),
             detect_point_timeout_seconds=getattr(
                 args,
                 "sharedq_detect_point_timeout_seconds",
-                getattr(args, "dd_detect_point_timeout_seconds", None),
+                None,
             ),
             **common_kwargs,
         )
@@ -584,26 +584,9 @@ def build_parser() -> argparse.ArgumentParser:
             "When set, beta is kept fixed and alpha=ratio*beta."
         ),
     )
-    parser.add_argument(
-        "--sharedq-random-initial-u",
-        "--dd-random-initial-u",
-        dest="sharedq_random_initial_u",
-        action="store_true",
-    )
-    parser.add_argument(
-        "--sharedq-boundary-center",
-        "--dd-boundary-center",
-        dest="sharedq_boundary_center",
-        choices=["range_center", "ray_midpoint"],
-        default="ray_midpoint",
-    )
-    parser.add_argument(
-        "--sharedq-detect-workers",
-        "--dd-detect-workers",
-        dest="sharedq_detect_workers",
-        type=int,
-        default=4,
-    )
+    parser.add_argument("--sharedq-random-initial-u", action="store_true")
+    parser.add_argument("--sharedq-boundary-center", choices=["range_center", "ray_midpoint"], default="ray_midpoint")
+    parser.add_argument("--sharedq-detect-workers", type=int, default=4)
     parser.add_argument("--tolerance", type=float, default=1e-9)
     parser.add_argument("--hdpi-candidate-mode", choices=["sampling", "accurate", "skyline"], default="accurate")
     parser.add_argument("--hdpi-sample-count", type=int, default=2048)
@@ -669,7 +652,7 @@ def main() -> None:
         _, summaries = run_shared_range(datasets, dataset_paths, utilities, args, detail_path)
         summary_rows.extend(summaries)
         write_rows(summary_path, summaries)
-    if "sharedq" in methods or "dd" in methods:
+    if "sharedq" in methods:
         for rho in rhos:
             radius = radius_from_rho(rho, dim)
             for ratio in alpha_beta_ratios:

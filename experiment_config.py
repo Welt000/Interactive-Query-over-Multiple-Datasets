@@ -44,7 +44,7 @@ from preprocess_skyline import (
 )
 
 SHAREDQ_METHOD = "sharedq"
-SHAREDQ_METHOD_NAMES = {"dd", "sharedq"}
+SHAREDQ_METHOD_NAMES = {"sharedq"}
 
 
 def canonical_method(method: str) -> str:
@@ -326,7 +326,7 @@ def make_args(config: ExperimentConfig) -> argparse.Namespace:
 
 def make_sharedq_args(config: ExperimentConfig) -> argparse.Namespace:
     """
-    Build args for SharedQ without binding it to HD-PI/RH/UH-* algorithms.
+    Build args for SharedQ without binding SharedQ to HD-PI/RH/UH-* algorithms.
 
     run_sharedq does not use algorithms_parsed, but make_args requires a valid
     algorithm name because Baseline/SUR share the same argparse namespace.

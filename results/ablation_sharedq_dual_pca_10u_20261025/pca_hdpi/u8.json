@@ -1,0 +1,95 @@
+{
+  "group": "pca_hdpi",
+  "utility_id": 8,
+  "status": "ok",
+  "reused": false,
+  "questions": 19,
+  "elapsed": 1034.4395164763555,
+  "accuracy": 1.0,
+  "resolved": true,
+  "datasets": 10,
+  "detect_rounds": 0,
+  "timings": {},
+  "details": [
+    {
+      "dataset_id": 0,
+      "dataset_name": "4d_100k_mix10_4_corr_1.txt",
+      "point_index": 21447,
+      "truth_index": 21447,
+      "correct": true,
+      "candidate_count": 1
+    },
+    {
+      "dataset_id": 1,
+      "dataset_name": "4d_100k_mix10_5_corr_2.txt",
+      "point_index": 5959,
+      "truth_index": 5959,
+      "correct": true,
+      "candidate_count": 1
+    },
+    {
+      "dataset_id": 2,
+      "dataset_name": "4d_100k_mix10_6_corr_3.txt",
+      "point_index": 59272,
+      "truth_index": 59272,
+      "correct": true,
+      "candidate_count": 1
+    },
+    {
+      "dataset_id": 3,
+      "dataset_name": "4d_100k_mix10_7_ind_1.txt",
+      "point_index": 77691,
+      "truth_index": 77691,
+      "correct": true,
+      "candidate_count": 1
+    },
+    {
+      "dataset_id": 4,
+      "dataset_name": "4d_100k_mix10_8_ind_2.txt",
+      "point_index": 36503,
+      "truth_index": 36503,
+      "correct": true,
+      "candidate_count": 1
+    },
+    {
+      "dataset_id": 5,
+      "dataset_name": "4d_100k_mix10_9_ind_3.txt",
+      "point_index": 25885,
+      "truth_index": 25885,
+      "correct": true,
+      "candidate_count": 1
+    },
+    {
+      "dataset_id": 6,
+      "dataset_name": "4d_100k_mix10_10_ind_4.txt",
+      "point_index": 50785,
+      "truth_index": 50785,
+      "correct": true,
+      "candidate_count": 1
+    },
+    {
+      "dataset_id": 7,
+      "dataset_name": "4d_100k_mix10_1_anti_1.txt",
+      "point_index": 81171,
+      "truth_index": 81171,
+      "correct": true,
+      "candidate_count": 1
+    },
+    {
+      "dataset_id": 8,
+      "dataset_name": "4d_100k_mix10_2_anti_2.txt",
+      "point_index": 43683,
+      "truth_index": 43683,
+      "correct": true,
+      "candidate_count": 1
+    },
+    {
+      "dataset_id": 9,
+      "dataset_name": "4d_100k_mix10_3_anti_3.txt",
+      "point_index": 41037,
+      "truth_index": 41037,
+      "correct": true,
+      "candidate_count": 1
+    }
+  ]
+}

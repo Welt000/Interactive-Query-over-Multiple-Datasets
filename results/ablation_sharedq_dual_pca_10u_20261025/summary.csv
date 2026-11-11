@@ -1,0 +1,6 @@
+group,pca_reduction,detect_divide,finished_utilities,successful_utilities,timeout_utilities,error_utilities,datasets_per_utility,reused,status,avg_questions_successful,avg_seconds_successful,accuracy_successful
+detect_divide_only,False,True,10,10,0,0,10,False,ok,22.2,6.556430337112397,1.0
+full,True,True,10,10,0,0,10,False,ok,23.1,7.163437256496399,1.0
+neither,False,False,10,10,0,0,10,False,ok,18.7,1183.0037710280158,1.0
+pca_hdpi,True,False,10,10,0,0,10,False,ok,20.0,986.4373121970333,1.0
+pca_original,True,False,10,10,0,0,10,False,ok,19.6,917.2252077780664,1.0

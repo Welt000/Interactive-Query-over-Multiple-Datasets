@@ -88,3 +88,15 @@ Important files:
 - Baseline and SUR use preprocessed skyline datasets.
 - SharedQ uses original datasets directly.
 
+
+
+## Research tools and ablations
+
+The default experiment above still uses the included 10 datasets. The
+[ablation guide](ablation/README.md) documents the PCA and partition switches,
+how to replay a fixed utility batch, and where to find the published results.
+The repository also includes optional benchmark, dataset generator, plotting,
+and [user study](user_study/README.md) sources. The optional tools may require
+additional datasets or dependencies; those are separate from the default run.
+
+[Technical report](IMD_Technical_Report.pdf)

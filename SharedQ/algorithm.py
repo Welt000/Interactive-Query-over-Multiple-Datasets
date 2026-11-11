@@ -111,8 +111,14 @@ class SharedQuestions:
         verbose: bool = False,
         verbose_detect_points: bool = False,
         detect_point_timeout_seconds: float | None = None,
+        hyperplane_reduction: bool = True,
+        partition_construction: str = "neighbor",
     ):
+        if partition_construction not in {"neighbor", "hdpi"}:
+            raise ValueError("partition_construction must be 'neighbor' or 'hdpi'")
         self.alpha = float(alpha)
+        self.hyperplane_reduction = bool(hyperplane_reduction)
+        self.partition_construction = partition_construction
         self.beta = float(beta)
         self.max_questions = int(max_questions)
         self.max_pairs_per_dataset = int(max_pairs_per_dataset)
@@ -291,6 +297,19 @@ class SharedQuestions:
                 preferred, rejected = question.right, question.left
 
             utility_range.add_preference(state.points[preferred], state.points[rejected])
+
+            # The HDPI-style PCA-only ablation constructs all candidate
+            # partitions once, then clips those regions by each new shared
+            # preference instead of rebuilding them from scratch.
+            hdpi_cache_updated: dict[int, bool] = {}
+            if self.partition_construction == "hdpi":
+                preference_normal = state.points[preferred] - state.points[rejected]
+                hdpi_cache_updated = {
+                    target.dataset_id: self._clip_hdpi_partition_cache(
+                        target, utility_range, preference_normal
+                    )
+                    for target in states
+                }
             if rejected in state.candidates:
                 state.candidates = [idx for idx in state.candidates if idx != rejected]
             transcript.append(
@@ -314,6 +333,19 @@ class SharedQuestions:
                 )
                 target.candidates = kept
                 target.resolved = len(kept) <= 1
+                if self.partition_construction == "hdpi":
+                    if hdpi_cache_updated.get(target.dataset_id, False):
+                        active = set(int(idx) for idx in target.candidates)
+                        target.local_regions = {
+                            idx: region for idx, region in target.local_regions.items()
+                            if idx in active
+                        }
+                        target.local_region_cache_version = self._state_cache_version(
+                            target, utility_range
+                        )
+                    else:
+                        target.local_regions = {}
+                        target.local_region_cache_version = None
             candidate_history.append(self._active_candidate_count(states))
 
         center = utility_range.center()
@@ -349,6 +381,8 @@ class SharedQuestions:
         utility_range: UtilityRange,
         asked: set[tuple[int, int, int]],
     ) -> _CandidateQuestion | None:
+        if not self.hyperplane_reduction:
+            return self._select_question_exhaustive(states, utility_range, asked)
         middle_points = {
             state.dataset_id: self._partition_middle_points(state, utility_range)
             for state in states
@@ -392,6 +426,59 @@ class SharedQuestions:
                 best_key = key
                 best_question = candidate
         return best_question
+
+    def _select_question_exhaustive(self, states, utility_range, asked):
+        """Score every unasked point pair; no PCA, sampling or pair-count cap.
+
+        Batching bounds memory only. The cross-dataset pruning score is the
+        same as the production selector; equal scores retain enumeration order.
+        """
+        from itertools import combinations
+
+        region_cache = {
+            state.dataset_id: self._state_region_cache(state, utility_range)
+            for state in states if len(state.candidates) > 1
+        }
+        total_candidates = sum(len(state.candidates) for state in states)
+        best = None
+        vertices = utility_range.vertices()
+        batch = []
+
+        def evaluate(items, current):
+            normals = np.vstack([item.normal for item in items])
+            scores = self._shared_pruning_scores(
+                normals, states, region_cache, total_candidates, utility_range
+            )
+            for item, score in zip(items, scores):
+                if current is None or float(score) > current.score:
+                    current = _CandidateQuestion(
+                        item.dataset_id, item.left, item.right, item.normal,
+                        0.0, float(score)
+                    )
+            return current
+
+        for state in states:
+            for left, right in combinations(sorted(state.candidates), 2):
+                if self._question_key(state.dataset_id, left, right) in asked:
+                    continue
+                normal = state.points[left] - state.points[right]
+                if np.linalg.norm(normal) <= EPS:
+                    continue
+                values = vertices @ normal
+                # A question whose outcome is already implied by R adds no
+                # information. Both strict sides must intersect the range.
+                if not (np.any(values > utility_range.tol)
+                        and np.any(values < -utility_range.tol)):
+                    continue
+                batch.append(_CandidateQuestion(
+                    state.dataset_id, int(left), int(right), normal, 0.0, 0.0
+                ))
+                if len(batch) == 64:
+                    best = evaluate(batch, best)
+                    batch = []
+        if batch:
+            best = evaluate(batch, best)
+        return best
 
     def _fallback_question(
         self,
@@ -505,17 +592,106 @@ class SharedQuestions:
                 return cached
 
         cache: dict[int, FastRegion] = {}
-        for candidate in state.candidates:
-            self._partition_region(
-                state.points,
-                int(candidate),
-                state.candidates,
-                utility_range,
-                cache,
-            )
+        if self.partition_construction == "hdpi":
+            # Match HDPI's construction: each candidate region starts from the
+            # current base utility polytope and is intersected with the
+            # halfspaces induced by every other candidate.
+            candidates = [int(i) for i in state.candidates]
+            for candidate in candidates:
+                region = fast_region_from_any(
+                    utility_range, state.points.shape[1], point_index=candidate
+                )
+                point = state.points[candidate]
+                others = [idx for idx in candidates if idx != candidate]
+                if others:
+                    other_points = state.points[np.asarray(others, dtype=int)]
+                    region.add_leq_batch(other_points - point, 0.0, owners=others)
+                region.refine_vertices()
+                cache[candidate] = region
+            state.local_regions = cache
+            state.local_region_cache_version = version
+            return cache
+
+        # When the convex-hull adjacency graph is available, enumerate the
+        # top-1 partitions that intersect the *whole current utility range*
+        # by the same anchor-and-neighbor expansion used by Detect. Unlike
+        # Detect, there is no ball/radius test: every partition reachable
+        # inside utility_range is retained. Convexity of the range ensures
+        # that every intersecting partition is connected to the anchor by
+        # adjacent intersecting partitions.
+        if state.adjacency and state.candidates:
+            candidate_pool = [int(i) for i in state.candidates]
+            candidate_set = set(candidate_pool)
+            center = utility_range.center()
+            anchor = int(candidate_pool[int(np.argmax(state.points[candidate_pool] @ center))])
+            visited: set[int] = set()
+            queue = deque([anchor])
+            while queue:
+                point_index = queue.popleft()
+                if point_index in visited:
+                    continue
+                visited.add(point_index)
+                region = self._partition_region(
+                    state.points,
+                    point_index,
+                    candidate_pool,
+                    utility_range,
+                    cache,
+                    state.adjacency,
+                )
+                if region is None:
+                    continue
+                for neighbor in self._partition_neighbors(
+                    state.points,
+                    point_index,
+                    candidate_pool,
+                    region,
+                    candidate_set,
+                    state.adjacency,
+                ):
+                    if neighbor not in visited:
+                        queue.append(neighbor)
+        else:
+            # A missing/failed hull graph cannot safely guide a local walk.
+            # Preserve the exact all-candidate construction in that case.
+            for candidate in state.candidates:
+                self._partition_region(
+                    state.points,
+                    int(candidate),
+                    state.candidates,
+                    utility_range,
+                    cache,
+                )
         state.local_regions = cache
         state.local_region_cache_version = version
         return cache
+
+    def _clip_hdpi_partition_cache(
+        self,
+        state: _DatasetState,
+        utility_range: UtilityRange,
+        preference_normal: np.ndarray,
+    ) -> bool:
+        """Incrementally clip cached HDPI-style regions by a new preference."""
+        if self.partition_construction != "hdpi" or not state.local_regions:
+            return False
+        previous_version = (
+            len(utility_range.constraints) - 1,
+            _candidate_tuple(state.candidates),
+        )
+        if state.local_region_cache_version != previous_version:
+            return False
+        if any(int(candidate) not in state.local_regions for candidate in state.candidates):
+            return False
+        clipped: dict[int, FastRegion] = {}
+        for candidate in state.candidates:
+            candidate = int(candidate)
+            region = state.local_regions[candidate].copy()
+            region.add_leq(-np.asarray(preference_normal, dtype=float), 0.0)
+            region.refine_vertices()
+            clipped[candidate] = region
+        state.local_regions = clipped
+        return True
 
     @staticmethod
     def _state_cache_version(
@@ -788,26 +964,54 @@ class SharedQuestions:
         candidate_pool: list[int],
         region: FastRegion,
         candidate_set: set[int],
+        adjacency: dict[int, tuple[int, ...]] | None = None,
     ) -> list[int]:
         if region.vertices is None or len(region.vertices) == 0:
             return []
         if region.active_neighbors:
-            return [
+            active = [
                 int(idx)
                 for idx in region.active_neighbors
                 if int(idx) != int(point_index) and int(idx) in candidate_set
             ]
+            if adjacency:
+                graph_set = set(int(idx) for idx in adjacency.get(int(point_index), ()))
+                active = [idx for idx in active if idx in graph_set]
+            if active:
+                return active
         point = points[point_index]
-        neighbors: list[int] = []
         vertices = region.vertices
-        for other in candidate_pool:
-            other = int(other)
-            if other == point_index or other not in candidate_set:
-                continue
-            values = vertices @ (points[other] - point)
-            if np.any(np.abs(values) <= 1e-7):
-                neighbors.append(other)
-        return neighbors
+        neighbor_pool = candidate_pool
+        if adjacency:
+            graph_neighbors = [
+                int(idx)
+                for idx in adjacency.get(int(point_index), ())
+                if int(idx) in candidate_set
+            ]
+            if graph_neighbors:
+                neighbor_pool = graph_neighbors
+        candidates = np.asarray(neighbor_pool, dtype=int)
+        if len(candidates) == 0:
+            return []
+        if len(candidate_set) != len(candidate_pool):
+            candidates = np.asarray([idx for idx in candidates if int(idx) in candidate_set], dtype=int)
+            if len(candidates) == 0:
+                return []
+        mask = candidates != int(point_index)
+        if not np.any(mask):
+            return []
+        candidates = candidates[mask]
+        if len(candidates) < 256:
+            neighbors: list[int] = []
+            for other in candidates:
+                other = int(other)
+                values = vertices @ (points[other] - point)
+                if np.any(np.abs(values) <= 1e-7):
+                    neighbors.append(other)
+            return neighbors
+        values = (points[candidates] - point) @ vertices.T
+        neighbor_mask = np.any(np.abs(values) <= 1e-7, axis=1)
+        return [int(idx) for idx in candidates[neighbor_mask]]
 
     @staticmethod
     def _active_candidate_count(states: list[_DatasetState]) -> int:
@@ -867,6 +1071,7 @@ class DetectDivideSharedQuestions(SharedQuestions):
         verbose_detect_points: bool = False,
         detect_point_timeout_seconds: float | None = None,
         ball_intersection_mode: str = "vertex",
+        hyperplane_reduction: bool = True,
     ):
         if boundary_center_strategy not in {"range_center", "ray_midpoint"}:
             raise ValueError("boundary_center_strategy must be 'range_center' or 'ray_midpoint'")
@@ -882,6 +1087,7 @@ class DetectDivideSharedQuestions(SharedQuestions):
             verbose=verbose,
             verbose_detect_points=verbose_detect_points,
             detect_point_timeout_seconds=detect_point_timeout_seconds,
+            hyperplane_reduction=hyperplane_reduction,
         )
         self.radius = float(radius)
         self.radius_growth = float(radius_growth)
@@ -1506,62 +1712,6 @@ class DetectDivideSharedQuestions(SharedQuestions):
         if len(offsets) == 0:
             return True
         return bool(np.all(normals @ point + offsets <= 1e-7))
-
-    def _partition_neighbors(
-        self,
-        points: np.ndarray,
-        point_index: int,
-        candidate_pool: list[int],
-        region: FastRegion,
-        candidate_set: set[int],
-        adjacency: dict[int, tuple[int, ...]] | None = None,
-    ) -> list[int]:
-        if region.vertices is None or len(region.vertices) == 0:
-            return []
-        if region.active_neighbors:
-            active = [
-                int(idx)
-                for idx in region.active_neighbors
-                if int(idx) != int(point_index) and int(idx) in candidate_set
-            ]
-            if adjacency:
-                graph_set = set(int(idx) for idx in adjacency.get(int(point_index), ()))
-                active = [idx for idx in active if idx in graph_set]
-            if active:
-                return active
-        point = points[point_index]
-        vertices = region.vertices
-        neighbor_pool = candidate_pool
-        if adjacency:
-            graph_neighbors = [
-                int(idx)
-                for idx in adjacency.get(int(point_index), ())
-                if int(idx) in candidate_set
-            ]
-            if graph_neighbors:
-                neighbor_pool = graph_neighbors
-        candidates = np.asarray(neighbor_pool, dtype=int)
-        if len(candidates) == 0:
-            return []
-        if len(candidate_set) != len(candidate_pool):
-            candidates = np.asarray([idx for idx in candidates if int(idx) in candidate_set], dtype=int)
-            if len(candidates) == 0:
-                return []
-        mask = candidates != int(point_index)
-        if not np.any(mask):
-            return []
-        candidates = candidates[mask]
-        if len(candidates) < 256:
-            neighbors: list[int] = []
-            for other in candidates:
-                other = int(other)
-                values = vertices @ (points[other] - point)
-                if np.any(np.abs(values) <= 1e-7):
-                    neighbors.append(other)
-            return neighbors
-        values = (points[candidates] - point) @ vertices.T
-        neighbor_mask = np.any(np.abs(values) <= 1e-7, axis=1)
-        return [int(idx) for idx in candidates[neighbor_mask]]
 
     def _divide(
         self,
